@@ -1,0 +1,7 @@
+= Multimethod Release History
+
+== Release 0.0.1: 2006/11/18
+
+* Initial Release
+* TODO
+  *  Fix how default parameters are scored.
