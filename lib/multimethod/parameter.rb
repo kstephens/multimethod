@@ -1,5 +1,7 @@
 module Multimethod
   class Parameter
+    include Comparable
+
     RESTARG_SCORE = 9999
 
     attr_accessor :name
@@ -9,20 +11,31 @@ module Multimethod
     attr_accessor :restarg
 
     attr_accessor :method
+    attr_accessor :signature
 
     def initialize(name, type = nil, default = nil, restarg = false)
       # $stderr.puts "initialize(#{name.inspect}, #{type}, #{restarg.inspect})"
-      name = name.to_s
-      if name.sub!(/^\*/, '')
-        restarg = true
-      end  
+      if name
+        name = name.to_s
+        if name.sub!(/^\*/, '')
+          restarg = true
+        end  
+        
+        name = name.intern unless name.kind_of?(Symbol)
+      end
 
-      name = name.intern unless name.kind_of?(Symbol)
       @name = name
       @i = nil
       @type = type || Kernel
       @default = default
       @restarg = restarg
+
+      @method = @signature = nil
+    end
+
+
+    def <=>(x)
+      @type <=> x.type
     end
 
 
@@ -39,14 +52,17 @@ module Multimethod
 
     def type_object
       if @type.kind_of?(String)
-        @type = @method.multimethod.table.name_to_object(@type, @method.mod, @method)
+        @type = Table.instance.name_to_object(@type, 
+                                              @signature.mod, 
+                                              @method && @method.file, 
+                                              @method && @method.line)
       end
       @type
     end
 
 
     def to_s
-      @restarg ? "*#{@name}" : @name
+      (@restarg ? "*" : '') + (@name.to_s || "_arg_#{@i}")
     end
 
 

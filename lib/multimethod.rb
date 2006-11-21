@@ -4,5 +4,6 @@ $:.unshift(File.dirname(__FILE__)) unless
 require 'multimethod/table'
 require 'multimethod/multimethod'
 require 'multimethod/method'
+require 'multimethod/signature'
 require 'multimethod/parameter'
 require 'multimethod/core_extensions'

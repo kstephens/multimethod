@@ -39,6 +39,18 @@ module Multimethod
     end
 
 
+    def find_method(signature)
+      m = method.select{|x| x.signature == signature}
+    end
+
+
+    def remove_method(x)
+      x = x.signature if x.kind_of?(Method)
+      x.multimethod = nil
+      @method.delete(x)
+    end
+
+
     def dispatch(rcvr, args)
       apply_method(lookup_method(rcvr, args), rcvr, args)
     end

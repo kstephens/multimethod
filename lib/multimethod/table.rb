@@ -79,15 +79,16 @@ module Multimethod
     # Support
     #
 
-    def name_to_object(name, scope = nil, method = nil)
+    def name_to_object(name, scope = nil, file = nil, line = nil)
       scope ||= Kernel
-      # THREAD CRITICAL
+      # THREAD CRITICAL BEGIN
       unless x = (@name_to_object[scope] ||= { })[name]
         # $stderr.puts " name_to_object(#{name.inspect}) in #{scope}"
         x = 
           @name_to_object[scope][name] = 
-          scope.module_eval(name, method ? method.file : __FILE__, method ? method.line : __LINE__)
+          scope.module_eval(name, file || __FILE__, line || __LINE__)
       end
+      # THREAD CRITICAL END
 
       x
     end

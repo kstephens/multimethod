@@ -37,25 +37,25 @@ module Multimethod
       rs = Parameter::RESTARG_SCORE
 
       assert_not_nil m1 = Method.new(Object, :m, [ A, :x, A, :y ])
-      assert_equal 3, m1.min_args
-      assert_equal 3, m1.max_args
+      assert_equal 3, m1.signature.min_args
+      assert_equal 3, m1.signature.max_args
 
       assert_not_nil m2 = Method.new(Object, :m, [ B, :x, A, :y ])
-      assert_equal 3, m2.min_args
-      assert_equal 3, m2.max_args
+      assert_equal 3, m2.signature.min_args
+      assert_equal 3, m2.signature.max_args
 
       assert_not_nil m3 = Method.new(Object, :m, [ C, :x,    '*rest' ])
-      assert_equal 2, m3.min_args
-      assert_equal nil, m3.max_args
-      assert_not_nil m3.restarg
+      assert_equal 2, m3.signature.min_args
+      assert_equal nil, m3.signature.max_args
+      assert_not_nil    m3.signature.restarg
 
       assert_not_nil m4 = Method.new(Object, :m, [ D, :x,    :y ])
-      assert_equal 3, m4.min_args
-      assert_equal 3, m4.max_args
+      assert_equal 3, m4.signature.min_args
+      assert_equal 3, m4.signature.max_args
 
       assert_not_nil m5 = Method.new(Object, :m, [ E, :y,    :y ])
-      assert_equal 3, m4.min_args
-      assert_equal 3, m4.max_args
+      assert_equal 3, m4.signature.min_args
+      assert_equal 3, m4.signature.max_args
       
       # 5 == 1.class.ancestors.index(Object)
       assert_equal [ 5, 0, 0 ]   , m1.score(c[:a_a])
