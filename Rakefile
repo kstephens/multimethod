@@ -7,7 +7,7 @@
 require 'rubygems'
 require 'hoe'
 
-PKG_Name = 'Multimethods'
+PKG_Name = 'Multimethod'
 PKG_DESCRIPTION = %{Supports Multimethod dispatching.
 
 For more details, see:
