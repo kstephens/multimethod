@@ -35,14 +35,14 @@ module Multimethod
       # Get our Multimethod for this
       mm = lookup_multimethod(name)
       mm.install_dispatch(mod)
-      m = mm.new_method(mod, params)
+      m = mm.new_method(mod, name, params)
  
       # Evaluate our method.
       new_body = body.clone
-      new_body.sub!(@@match_def, m.to_ruby)
+      new_body.sub!(@@match_def, m.to_ruby_def)
 
       # if m.restarg
-      #   $stderr.puts "install_method(#{mod}) => #{m.to_ruby}:\n#{new_body}"
+      #   $stderr.puts "install_method(#{mod}) => #{m.to_ruby_signature}:\n#{new_body}"
       # end
 
       file ||= __FILE__; line ||= __LINE__

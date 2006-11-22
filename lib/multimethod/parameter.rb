@@ -62,17 +62,17 @@ module Multimethod
 
 
     def to_s
+      "#{@type} #{to_ruby_arg}"
+    end
+    
+
+    def to_ruby_arg
+      "#{to_s_name}#{@default ? ' = ' + @default : ''}"
+    end
+
+
+    def to_s_name
       (@restarg ? "*" : '') + (@name.to_s || "_arg_#{@i}")
-    end
-
-
-    def to_s_long
-      "#{@type} #{to_ruby}"
-    end
-
-
-    def to_ruby
-      "#{to_s}#{@default ? ' = ' + @default : ''}"
     end
 
   end # class

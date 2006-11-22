@@ -3,8 +3,10 @@ module Multimethod
   class Signature
     include Comparable
 
-    attr_accessor :mod
-    attr_accessor :parameter
+    attr_accessor :mod     # The Module the signature is bound to.
+    attr_accessor :class_method # True if the signature is bound to the class.
+    attr_accessor :name    # The name of the method signature.
+    attr_accessor :parameter # The parameters of the method, self included.
 
     attr_accessor :min_args
     attr_accessor :max_args
@@ -17,8 +19,12 @@ module Multimethod
     attr_accessor :line
 
 
-    def initialize(mod, params)
-      @mod = mod
+    def initialize(*opts)
+      opts = Hash[*opts]
+
+      @mod = opts[:mod]
+      @name = opts[:name]
+      @class_method = false
       @parameter = [ ]
       @min_args = 0
       @max_args = 0
@@ -27,11 +33,14 @@ module Multimethod
 
       @score = { }
 
-      # Add self parameter at front.
-      add_parameter(Parameter.new('self', mod))
+      # Handle a string representation of a signature.
+      case params = opts[:string]
+      when String
+        scan_string(params)
+      end
 
       # Handle other parameters.
-      case params
+      case params = opts[:parameter]
       when Array
         scan_parameters(params)
       when String
@@ -46,7 +55,35 @@ module Multimethod
     end
 
 
+    # Scan
+    def scan_string(str, need_names = true)
+      if md = /^(\w+(::\w+)*)#(\w+)/i.match(str)
+        str = md.post_match
+        @mod = md[1]
+        @name = md[3]
+      end
+
+      @mod = mod
+      @name = name
+
+      if md = /^[(]/i.match(str)
+        str = md.post_match
+      else
+      end
+
+      if md = /^[)]\s*$/i.match(str)
+        str = md.pre_match
+      else
+      end
+
+      scan_parameters_string(str, need_names)
+    end
+
+
     def scan_parameters_string(params, need_names = true)
+
+      # Add self parameter at front.
+      add_parameter(Parameter.new('self', mod)) if @parameter.empty?
 
       #$stderr.puts "scan_parameters_string(#{params.inspect})"
 
@@ -95,6 +132,9 @@ module Multimethod
 
 
     def scan_parameters(params)
+      # Add self parameter at front.
+      add_parameter(Parameter.new('self', mod)) if @parameter.empty?
+
       until params.empty?
         name = nil
         type = nil
@@ -200,30 +240,40 @@ module Multimethod
     end
 
  
-    def parameter_to_s(p = nil)
-      p ||= @parameter
-      p.collect{|x| x.to_s_long}.join(', ')
-    end
-
-
     def to_s(name = nil)
-      name ||= '_'
+      name ||= @name || '_'
       p = @parameter.clone
       rcvr = p.shift
       "#{rcvr.type.name}##{name}(#{parameter_to_s(p)})"
     end
 
 
-    def to_ruby(name = nil)
-      name ||= '_'
-      "def #{name}(#{to_s_arg})"
+    def parameter_to_s(p = nil)
+      p ||= @parameter
+      p.collect{|x| x.to_s}.join(', ')
     end
 
-    def to_s_arg
+
+    def to_ruby_def(name = nil)
+      name ||= @name || '_'
+      "def #{name}(#{to_ruby_arg})"
+    end
+
+
+    def to_ruby_signature(name = nil)
+      name ||= @name || '_'
+      p = @parameter.clone
+      rcvr = p.shift
+      "#{mod.name}##{name}(#{to_ruby_arg})"
+    end
+
+
+    def to_ruby_arg
       x = @parameter.clone
       x.shift
-      x.collect{|x| x.to_ruby}.join(', ')
+      x.collect{|x| x.to_ruby_arg}.join(', ')
     end
+
 
     def inspect
       to_s

@@ -1,20 +1,21 @@
 module Multimethod
 
   class Method
-    attr_accessor :name
     attr_accessor :signature
+    attr_accessor :impl_name
 
     attr_accessor :multimethod
     attr_accessor :file
     attr_accessor :line
 
-    def initialize(mod, name, params)
+    def initialize(impl_name, mod, name, params)
       raise NameError, "multimethod method name not specified" unless name && name.to_s.size > 0
+      raise NameError, "multimethod method impl_name not specified" unless impl_name && impl_name.to_s.size > 0
 
-      name = Multimethod.normalize_name(name)
+      impl_name = Multimethod.normalize_name(impl_name)
 
-      @name = name
-      @signature = Signature.new(mod, params)
+      @impl_name = impl_name
+      @signature = Signature.new(:mod => mod, :name => name, :parameter => params)
     end
     
 
@@ -48,18 +49,25 @@ module Multimethod
 
 
     def to_s(name = nil)
-      name ||= @name
+      name ||= @impl_name
       @signature.to_s(name)
     end
 
 
-    def to_ruby
-      @signature.to_ruby(@name)
+    def to_ruby_def(name = nil)
+      name ||= @impl_name
+      @signature.to_ruby_def(name)
     end
 
 
-    def to_s_arg
-      @signature.to_s_arg
+    def to_ruby_signature(name = nil)
+      name ||= @impl_name
+      @signature.to_ruby_signature(name)
+    end
+
+
+    def to_ruby_arg
+      @signature.to_ruby_arg
     end
 
 

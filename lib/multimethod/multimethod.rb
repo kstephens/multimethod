@@ -23,8 +23,8 @@ module Multimethod
     end
 
 
-    def new_method(mod, *args)
-      m = Method.new(mod, gensym, *args)
+    def new_method(mod, name, *args)
+      m = Method.new(gensym(name), mod, name, *args)
       add_method(m)
       m
     end
@@ -64,7 +64,7 @@ module Multimethod
         $stderr.puts "\n"
       end
       raise NameError, "Cannot find multimethod for #{rcvr.class.name}##{@name}(#{args})" unless meth
-      rcvr.send(meth.name, *args)
+      rcvr.send(meth.impl_name, *args)
     end
 
 
@@ -106,6 +106,7 @@ module Multimethod
 
       result
     end
+
 
     def score_methods(meths, args)
       scores = meths.collect do |meth|
