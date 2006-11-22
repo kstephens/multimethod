@@ -57,37 +57,49 @@ module Multimethod
 
     # Scan
     def scan_string(str, need_names = true)
+
+      str.sub!(/^\s+/, '')
+
       if md = /^(\w+(::\w+)*)#(\w+)/i.match(str)
         str = md.post_match
         @mod = md[1]
         @name = md[3]
-      end
-
-      @mod = mod
-      @name = name
-
-      if md = /^[(]/i.match(str)
+      elsif md  = /^def\s+(\w+)/i.match(str)
         str = md.post_match
+        @name = md[1]
       else
+        raise NameError, "Syntax error in multimethod signature at #{str.inspect}"
       end
 
-      if md = /^[)]\s*$/i.match(str)
-        str = md.pre_match
-      else
-      end
+      # Resolve mod name.
+      # FIXME!
 
-      scan_parameters_string(str, need_names)
+      # Add self parameter.
+      add_self
+
+      # Parse parameter list.
+      if md = /^\(/i.match(str)
+        str = md.post_match
+
+        str = scan_parameters_string(str, need_names)
+
+        if md = /^\)/i.match(str)
+          str = md.post_match
+        else
+          raise NameError, "Syntax error in multimethod parameters at #{str.inspect}"
+        end
+      end
+      
+      str
     end
 
 
-    def scan_parameters_string(params, need_names = true)
+    def scan_parameters_string(str, need_names = true)
 
       # Add self parameter at front.
-      add_parameter(Parameter.new('self', mod)) if @parameter.empty?
+      add_self
 
-      #$stderr.puts "scan_parameters_string(#{params.inspect})"
-
-      str = params.clone
+      # $stderr.puts "scan_parameters_string(#{str.inspect})"
 
       until str.empty?
         name = nil
@@ -97,6 +109,7 @@ module Multimethod
         str.sub!(/^\s+/, '')
 
         # $stderr.puts "  str=#{str.inspect}"
+        # $stderr.puts "  params=#{parameter_to_s}"
         
         if md = /^(\w+(::\w+)*)\s+(\w+)/i.match(str)
           str = md.post_match
@@ -107,33 +120,40 @@ module Multimethod
           type = nil
           name = md[1]
         else
-          raise NameError, "Syntax error in multimethod parameters: #{params.inspect} before #{str.inspect}"
+          raise NameError, "Syntax error in multimethod parameters: at #{str.inspect}"
         end
         
+        # Parse parameter default.
         if md = /^\s*=\s*([^,]+)/.match(str)
           str = md.post_match
           default = md[1]
         end
         
-        
+        # Add parameter
+        p = Parameter.new(name, type, default)
+        add_parameter(p)
+
+        # Parse , or )
         str.sub!(/^\s+/, '')
         if ! str.empty? 
           if md = /^,/.match(str)
             str = md.post_match
+          elsif md = /^\)/.match(str)
+            break
           else
-            raise NameError, "Syntax error in multimethod parameters: expected ',' before #{str.inspect}"
+            raise NameError, "Syntax error in multimethod parameters: expected ',' or ')' at #{str.inspect}"
           end
         end
         
-        p = Parameter.new(name, type, default)
-        add_parameter(p)
       end
+
+      str
     end
 
 
     def scan_parameters(params)
       # Add self parameter at front.
-      add_parameter(Parameter.new('self', mod)) if @parameter.empty?
+      add_self
 
       until params.empty?
         name = nil
@@ -163,6 +183,12 @@ module Multimethod
 
     end
     
+
+    # Add self parameter at front.
+    def add_self
+      add_parameter(Parameter.new('self', @mod)) if @parameter.empty?
+    end
+
 
     def add_parameter(p)
       if p.restarg
