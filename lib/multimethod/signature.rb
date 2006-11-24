@@ -59,7 +59,7 @@ module Multimethod
     def <=>(s)
       x = ! @class_method == ! s.class_method ? 0 : 1
       x = @parameter <=> s.parameter if x == 0
-      $stderr.puts "#{to_s} <=> #{s.to_s} => #{x.inspect}"
+      # $stderr.puts "#{to_s} <=> #{s.to_s} => #{x.inspect}"
       x
     end
 
