@@ -5,8 +5,6 @@ module Multimethod
     attr_accessor :impl_name
 
     attr_accessor :multimethod
-    attr_accessor :file
-    attr_accessor :line
 
     def initialize(impl_name, *args)
       if args.size == 1
@@ -24,12 +22,6 @@ module Multimethod
       @impl_name = impl_name
     end
     
-
-    def multimethod=(x)
-      @multimethod = x
-      @signature && @signature.multimethod = x
-    end
-
 
     def matches_signature(signature)
       @signature == signature

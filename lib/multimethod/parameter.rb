@@ -10,7 +10,6 @@ module Multimethod
     attr_accessor :default
     attr_accessor :restarg
 
-    attr_accessor :method
     attr_accessor :signature
     attr_accessor :verbose
 
@@ -29,7 +28,7 @@ module Multimethod
 
       self.name = name # may affect @restarg
 
-      @method = @signature = nil
+      @signature = nil
     end
 
 
@@ -146,8 +145,8 @@ module Multimethod
       if @type.kind_of?(String)
         @type = Table.instance.name_to_object(@type, 
                                               @signature.mod, 
-                                              @method && @method.file, 
-                                              @method && @method.line)
+                                              @signature.file, 
+                                              @signature.line)
       end
       @type
     end

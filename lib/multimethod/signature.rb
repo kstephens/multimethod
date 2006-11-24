@@ -14,8 +14,6 @@ module Multimethod
     attr_accessor :restarg      # The "*args" parameter or nil
     attr_accessor :default      # The first parameter with a default value.
 
-    attr_accessor :multimethod
-    attr_accessor :method
     attr_accessor :file
     attr_accessor :line
 
@@ -33,7 +31,6 @@ module Multimethod
       @restarg = nil
       @default = nil
 
-      @method = nil
       @multimethod = nil
 
       @verbose = nil

@@ -42,8 +42,6 @@ module Multimethod
       mm = lookup_multimethod(signature.name)
       mm.install_dispatch(mod)
       m = mm.new_method_from_signature(signature)
-      m.file = file
-      m.line = line
 
       # Replace the multimethod signature with a plain Ruby signature.
       new_body = m.to_ruby_def + new_body
