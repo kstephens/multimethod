@@ -1,5 +1,11 @@
 = Multimethod Release History
 
+== Release 0.1.0: 2006/11/24
+
+* Better internal design.
+* TODO
+  *  Fix how default parameters are scored.
+
 == Release 0.0.1: 2006/11/18
 
 * Initial Release

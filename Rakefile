@@ -18,6 +18,7 @@ http://multimethod.rubyforge.org/
 
 }
 
+
 #################################################################
 # Release notes
 #
@@ -50,6 +51,8 @@ end
 #################################################################
 
 PKG_NAME = PKG_Name.gsub(/[a-z][A-Z]/) {|x| "#{x[0,1]}_#{x[1,1]}"}.downcase
+
+PKG_SVN_ROOT="svn+ssh://rubyforge.org/var/svn/#{PKG_NAME}/#{PKG_NAME}"
 
 release, release_notes = get_release_notes
 
@@ -96,6 +99,14 @@ end
 task version_rb => :update_version
 
 # task :test => :update_version
+
+#################################################################
+# SVN
+#
+
+task :svn_release do
+  system("svn cp -m 'Release #{PKG_VERSION}' . #{PKG_SVN_ROOT}/release/#{PKG_VERSION}")
+end
 
 
 # Misc Tasks ---------------------------------------------------------

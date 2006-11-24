@@ -28,7 +28,6 @@
 ./lib/.svn/props/multimethod.rb.svn-work
 ./lib/.svn/text-base/multimethod.rb.svn-base
 ./lib/multimethod.rb
-./lib/multimethod/#multimethod.rb#
 ./lib/multimethod/.svn/README.txt
 ./lib/multimethod/.svn/empty-file
 ./lib/multimethod/.svn/entries
@@ -52,6 +51,7 @@
 ./lib/multimethod/core_extensions.rb
 ./lib/multimethod/method.rb
 ./lib/multimethod/multimethod.rb
+./lib/multimethod/multimethod_version.rb
 ./lib/multimethod/parameter.rb
 ./lib/multimethod/signature.rb
 ./lib/multimethod/table.rb
@@ -115,11 +115,13 @@
 ./test/.svn/empty-file
 ./test/.svn/entries
 ./test/.svn/format
+./test/.svn/prop-base/add_remove_test.rb.svn-base
 ./test/.svn/prop-base/multimethod_test.rb.svn-base
 ./test/.svn/prop-base/signature_test.rb.svn-base
 ./test/.svn/props/add_remove_test.rb.svn-work
 ./test/.svn/props/multimethod_test.rb.svn-work
 ./test/.svn/props/signature_test.rb.svn-work
+./test/.svn/text-base/add_remove_test.rb.svn-base
 ./test/.svn/text-base/method_test.rb.svn-base
 ./test/.svn/text-base/multimethod_test.rb.svn-base
 ./test/.svn/text-base/parameter_test.rb.svn-base
