@@ -128,6 +128,7 @@ module Multimethod
 
 
     def scan_parameters_string(str, need_names = true)
+      # @verbose = true
 
       # Add self parameter at front.
       add_self
@@ -135,78 +136,10 @@ module Multimethod
       $stderr.puts "scan_parameters_string(#{str.inspect})" if @verbose
 
       until str.empty?
-        name = nil
-        type = nil
-        default = nil
-        
-        str.sub!(/\A\s+/, '')
-
-        $stderr.puts "  str=#{str.inspect}" if @verbose
-        
-        if md = /\A(\w+(::\w+)*)\s+(\w+)/s.match(str)
-          # $stderr.puts "   pre_match=#{md.pre_match.inspect}"
-          # $stderr.puts "   md[0]=#{md[0].inspect}"
-          str = md.post_match
-          type = md[1]
-          name = md[3]
-        elsif md = /\A(\*?\w+)/s.match(str)
-          # $stderr.puts "   pre_match=#{md.pre_match.inspect}"
-          # $stderr.puts "   md[0]=#{md[0].inspect}"
-          str = md.post_match
-          type = nil
-          name = md[1]
-        else
-          raise NameError, "Syntax error in multimethod parameters: expected type and/or name at #{str.inspect}"
-        end
-        
-        $stderr.puts "  type=#{type.inspect}" if @verbose       
-        $stderr.puts "  name=#{name.inspect}" if @verbose       
-
-        # Parse parameter default.
-        if md = /\A\s*=\s*/.match(str)
-          str = md.post_match
-
-          in_paren = 0
-          default = ''
-          until str.empty?
-            # $stderr.puts "    default: str=#{str.inspect}"
-            # $stderr.puts "    default: params=#{parameter_to_s}"
-
-            if md = /\A(\s+)/s.match(str)
-              str = md.post_match
-              default = default + md[1]
-            end
-
-            if md = /\A("([^"\\]|\\.)*")/s.match(str)
-              str = md.post_match
-              default = default + md[1]
-            elsif md = /\A('([^'\\]|\\.)*')/s.match(str)
-              str = md.post_match
-              default = default + md[1]
-            elsif md = /\A(\()/.match(str)
-              str = md.post_match
-              in_paren = in_paren + 1
-              default = default + md[1]
-            elsif in_paren > 0 && md = /\A(\))/s.match(str)
-              str = md.post_match
-              in_paren = in_paren - 1
-              default = default + md[1]
-            elsif md = /\A(\))/s.match(str)
-              break
-            elsif in_paren == 0 && md = /\A,/s.match(str)
-              break
-            elsif md = /\A(\w+)/s.match(str)
-              str = md.post_match
-              default = default + md[1]
-            elsif md = /\A(.)/s.match(str)
-              str = md.post_match
-              default = default + md[1] 
-            end
-          end
-        end
-
-        # Add parameter
-        p = Parameter.new(name, type, default)
+        # Scan parameter
+        p = Parameter.new
+        p.verbose = @verbose
+        str = p.scan_string(str)
         add_parameter(p)
         $stderr.puts "  params=#{parameter_to_s}" if @verbose       
 
