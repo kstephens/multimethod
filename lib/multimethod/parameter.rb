@@ -34,8 +34,12 @@ module Multimethod
     end
 
 
-    def <=>(x)
-      @type <=> x.type
+    def <=>(p)
+      x = @type <=> p.type 
+      x = ! @restarg == ! p.restarg ? 0 : 1 if x == 0
+      x = ! @default == ! p.default ? 0 : 1 if x == 0
+      $stderr.puts "#{to_s} <=> #{p.to_s} => #{x.inspect}"
+      x
     end
 
 

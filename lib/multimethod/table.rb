@@ -21,32 +21,37 @@ module Multimethod
     @@match_def = /^\s*def\s+(\w+)([(](.*)[)])?/
     # Interface to Multimethod::Module mixin multimethod
     def install_method(mod, body, file = nil, line = nil)
+      file ||= __FILE__
+      line ||= __LINE__
       verbose = nil
       #if body =~ /def bar\(x, y\)/
       #  verbose = 1
       #end
 
+      # Parse the signature from the method body
       signature = Signature.new
       signature.mod = mod
       signature.verbose = verbose
-      
+      signature.file = file
+      signature.line = line
       new_body = signature.scan_string(body.clone)
       
       # Get our Multimethod for this
       mm = lookup_multimethod(signature.name)
       mm.install_dispatch(mod)
       m = mm.new_method_from_signature(signature)
- 
-      # Evaluate our method.
+      m.file = file
+      m.line = line
+
+      # Replace the multimethod signature with a plain Ruby signature.
       new_body = m.to_ruby_def + new_body
 
       #if true || m.signature.restarg
       #   $stderr.puts "install_method(#{mod}) => #{m.to_ruby_signature}:\n#{new_body}"
       #end
 
-      file ||= __FILE__; line ||= __LINE__
-      m.file = file; m.line = line
-      mod.module_eval(new_body, file || __FILE__, line || __LINE__)
+      # Evaluate the new method body.     
+      mod.module_eval(new_body, file, line)
     end
 
 

@@ -140,11 +140,43 @@ module Multimethod
 
       assert_signature m1
       assert           m1.class_method
-      # assert_equal     b:, m1.parameter[2].name
+      assert_equal     :b, m1.parameter[2].name
       assert           m1.parameter[2].default
       assert_equal     'call_method(foo(bar, "45,67"), \',\')', m1.parameter[2].default
     end
 
+    def test_scan_default_at_end
+      assert_not_nil m1 = Signature.new(:string => 'Object.m(A a, B b = call_method(foo(bar, "45,67"), \',\'), c = nil)')
+
+      assert           m1.class_method
+      assert_equal     :c, m1.parameter[3].name
+      assert           m1.parameter[3].default
+      assert_equal     'nil', m1.parameter[3].default
+    end
+
+
+    def test_cmp
+      assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
+      assert_not_nil m2 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
+
+      assert_equal 0, m1 <=> m2
+
+
+      assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
+      assert_not_nil m2 = Signature.new(:string => 'Object#m(A q, B x, c = nil, *args)')
+
+      assert_equal 0, m1 <=> m2
+
+      assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
+      assert_not_nil m2 = Signature.new(:string => 'Object#m(A q, B x, c = nil, d)')
+
+      assert_equal 1, m1 <=> m2
+
+      assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
+      assert_not_nil m2 = Signature.new(:string => 'Object#m(A q, B x, c = nil)')
+
+      assert_equal 1, m1 <=> m2
+     end
 
   end # class
     

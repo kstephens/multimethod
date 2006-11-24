@@ -56,8 +56,11 @@ module Multimethod
     
 
     # For sort
-    def <=>(x)
-      @parameter <=> x.parameter
+    def <=>(s)
+      x = ! @class_method == ! s.class_method ? 0 : 1
+      x = @parameter <=> s.parameter if x == 0
+      $stderr.puts "#{to_s} <=> #{s.to_s} => #{x.inspect}"
+      x
     end
 
 
@@ -65,8 +68,7 @@ module Multimethod
       if @mod && @mod.kind_of?(String)
         @mod = Table.instance.name_to_object(@mod, 
                                               nil, 
-                                              @method && @method.file, 
-                                              @method && @method.line)
+                                              file, line)
       end
 
       @mod
@@ -113,7 +115,7 @@ module Multimethod
         if md = /\A\)/.match(str)
           str = md.post_match
         else
-          raise NameError, "Syntax error in multimethod parameters at #{str.inspect}"
+          raise NameError, "Syntax error in multimethod parameters expected ')' at #{str.inspect}"
         end
       end
       
@@ -185,6 +187,8 @@ module Multimethod
               str = md.post_match
               in_paren = in_paren - 1
               default = default + md[1]
+            elsif md = /\A(\))/s.match(str)
+              break
             elsif in_paren == 0 && md = /\A,/s.match(str)
               break
             elsif md = /\A(\w+)/s.match(str)
