@@ -3,6 +3,7 @@
 == Release 0.1.0: 2006/11/24
 
 * Better internal design.
+* Multimethods can be added and removed.
 * TODO
   *  Fix how default parameters are scored.
 
