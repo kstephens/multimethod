@@ -3,15 +3,16 @@ module Multimethod
   class Signature
     include Comparable
 
-    attr_accessor :mod     # The Module the signature is bound to.
+    attr_accessor :mod          # The Module the signature is bound to.
     attr_accessor :class_method # True if the signature is bound to the class.
-    attr_accessor :name    # The name of the method signature.
-    attr_accessor :parameter # The parameters of the method, self included.
+    attr_accessor :name         # The name of the method signature.
+    attr_accessor :parameter    # The parameters of the method, self included.
 
-    attr_accessor :min_args
-    attr_accessor :max_args
-    attr_accessor :restarg
-    attr_accessor :default
+    attr_accessor :min_args     # The minimum # of arguments for this signature
+    attr_accessor :max_args     # The maximum # of arguments for this signature;
+                                #   May be nil, if restargs
+    attr_accessor :restarg      # The "*args" parameter or nil
+    attr_accessor :default      # The first parameter with a default value.
 
     attr_accessor :multimethod
     attr_accessor :method
@@ -57,7 +58,8 @@ module Multimethod
 
     # For sort
     def <=>(s)
-      x = ! @class_method == ! s.class_method ? 0 : 1
+      x = @name.to_s <=> s.name.to_s 
+      x = (! @class_method == ! s.class_method ? 0 : 1) if x == 0
       x = @parameter <=> s.parameter if x == 0
       # $stderr.puts "#{to_s} <=> #{s.to_s} => #{x.inspect}"
       x
@@ -65,11 +67,13 @@ module Multimethod
 
 
     def mod
+      # THREAD CRITICAL BEGIN
       if @mod && @mod.kind_of?(String)
         @mod = Table.instance.name_to_object(@mod, 
                                               nil, 
                                               file, line)
       end
+      # THREAD CRITICAL END
 
       @mod
     end

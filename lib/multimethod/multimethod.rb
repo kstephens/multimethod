@@ -39,6 +39,7 @@ module Multimethod
 
     def add_method(method)
       # THREAD CRITICAL BEGIN
+      remove_method(method.signature)
       @method.push(method)
       method.multimethod = self
       @lookup_method = { } # flush cache
@@ -46,15 +47,38 @@ module Multimethod
     end
 
 
+    def matches_signature(signature)
+      @name == signature.name
+    end
+
+
     def find_method(signature)
-      m = method.select{|x| x.signature == signature}
+      m = @method.select{|x| x.matches_signature(signature)}
+
+      m
     end
 
 
     def remove_method(x)
-      x = x.signature if x.kind_of?(Method)
-      x.multimethod = nil
-      @method.delete(x)
+      case x
+      when Signature
+        m = find_method(x) 
+        m = m[0]
+        return unless m
+        raise("No method found for #{x.to_s}") unless m
+      else
+        m = x
+      end
+
+      m.remove_implementation
+      m.multimethod = nil
+      @method.delete(m)
+      @lookup_method = { } # flush cache
+
+      # Remove multimethod dispatch in the method's module?
+      if @method.collect{|x| m.signature.mod = m.signature.mod}.empty?
+        remove_dispatch(m.signature.mod)
+      end
     end
 
 
@@ -133,6 +157,17 @@ module Multimethod
       # $stderr.puts "score_methods(#{args.inspect}) => \n#{scores.inspect}"
 
       scores
+    end
+
+
+    def remove_dispatch(mod)
+      # THREAD CRITICAL BEGIN
+      if @dispatch[mod]
+        @dispatch[mod] = false
+        $stderr.puts "Removing dispatch for #{mod.name}##{name}"
+        mod.class_eval("remove_method #{name.inspect}")
+      end
+      # THREAD CRITICAL END
     end
 
 

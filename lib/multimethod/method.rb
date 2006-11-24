@@ -31,6 +31,18 @@ module Multimethod
     end
 
 
+    def matches_signature(signature)
+      @signature == signature
+    end
+
+
+    def remove_implementation
+      # Remove the method implementation
+      # $stderr.puts "Removing implementation for #{signature.to_s} => #{impl_name}"
+      signature.mod.class_eval("remove_method #{impl_name.inspect}")
+    end
+
+
     # For score sort
     def <=>(x)
       0

@@ -159,25 +159,29 @@ module Multimethod
       assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
       assert_not_nil m2 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
 
-      assert_equal 0, m1 <=> m2
       assert       m1 == m2
+
+
+      assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
+      assert_not_nil m2 = Signature.new(:string => 'Object#x(A a, B b, c = nil, *d)')
+
+      assert       m1 != m2
 
 
       assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
       assert_not_nil m2 = Signature.new(:string => 'Object#m(A q, B x, c = nil, *args)')
 
-      assert_equal 0, m1 <=> m2
       assert       m1 == m2
 
       assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
       assert_not_nil m2 = Signature.new(:string => 'Object#m(A q, B x, c = nil, d)')
 
-      assert_equal 1, m1 <=> m2
+      assert       m1 != m2
 
       assert_not_nil m1 = Signature.new(:string => 'Object#m(A a, B b, c = nil, *d)')
       assert_not_nil m2 = Signature.new(:string => 'Object#m(A q, B x, c = nil)')
 
-      assert_equal 1, m1 <=> m2
+      assert       m1 != m2
      end
 
   end # class

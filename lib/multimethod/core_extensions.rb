@@ -25,11 +25,16 @@ module Multimethod
         ::Multimethod::Table.instance.install_method(self, body, file, line)
       end
     end
+
+    def remove_multimethod(signature)
+      ::Multimethod::Table.instance.remove_method(signature)
+    end
+
   end # class
 end # module
 
 
-# Add to Module
+# Add to Object
 Object.class_eval do
   include Multimethod::ObjectExtension
 end
