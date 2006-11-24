@@ -10,10 +10,12 @@ module Multimethod
     class D < B; end
     class E < A; end
 
+
     def setup
       super
     end
     
+
     def test_score
       # Make some argument lists.
       types = [ A, B, C, D, E ]

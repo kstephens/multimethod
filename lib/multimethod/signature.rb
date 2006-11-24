@@ -31,6 +31,9 @@ module Multimethod
       @restarg = nil
       @default = nil
 
+      @method = nil
+      @multimethod = nil
+
       @score = { }
 
       # Handle a string representation of a signature.
@@ -55,18 +58,37 @@ module Multimethod
     end
 
 
+    def mod
+      if @mod && @mod.kind_of?(String)
+        @mod = Table.instance.name_to_object(@mod, 
+                                              nil, 
+                                              @method && @method.file, 
+                                              @method && @method.line)
+      end
+
+      @mod
+    end
+
+
     # Scan
     def scan_string(str, need_names = true)
 
       str.sub!(/^\s+/, '')
 
-      if md = /^(\w+(::\w+)*)#(\w+)/i.match(str)
+      if md = /^(\w+(::\w+)*)#(\w+)/.match(str)
         str = md.post_match
         @mod = md[1]
         @name = md[3]
-      elsif md  = /^def\s+(\w+)/i.match(str)
+      elsif md = /^(\w+(::\w+)*)\.(\w+)/.match(str)
         str = md.post_match
-        @name = md[1]
+        @mod = md[1]
+        @class_method = true
+        @name = md[3]
+      elsif md  = /^(\w+(::\w+)*)?\s+def\s+(self\.)?(\w+)/.match(str)
+        str = md.post_match
+        @mod = md[1]
+        @class_method = ! ! md[3]
+        @name = md[4]
       else
         raise NameError, "Syntax error in multimethod signature at #{str.inspect}"
       end
@@ -95,6 +117,7 @@ module Multimethod
 
 
     def scan_parameters_string(str, need_names = true)
+      in_paren = 0
 
       # Add self parameter at front.
       add_self
@@ -111,11 +134,11 @@ module Multimethod
         # $stderr.puts "  str=#{str.inspect}"
         # $stderr.puts "  params=#{parameter_to_s}"
         
-        if md = /^(\w+(::\w+)*)\s+(\w+)/i.match(str)
+        if md = /^(\w+(::\w+)*)\s+(\w+)/.match(str)
           str = md.post_match
           type = md[1]
           name = md[3]
-        elsif md = /^(\*?\w+)/i.match(str)
+        elsif md = /^(\*?\w+)/.match(str)
           str = md.post_match
           type = nil
           name = md[1]
@@ -124,11 +147,44 @@ module Multimethod
         end
         
         # Parse parameter default.
-        if md = /^\s*=\s*([^,]+)/.match(str)
+        if md = /^\s*=\s*/.match(str)
           str = md.post_match
-          default = md[1]
+          default = ''
+          until str.empty?
+            # $stderr.puts "    default: str=#{str.inspect}"
+            # $stderr.puts "    default: params=#{parameter_to_s}"
+
+            if md = /^(\s+)/.match(str)
+              str = md.post_match
+              default = default + md[1]
+            end
+
+            if md = /^("([^"\\]|\\.)*")/.match(str)
+              str = md.post_match
+              default = default + md[1]
+            elsif md = /^('([^'\\]|\\.)*')/.match(str)
+              str = md.post_match
+              default = default + md[1]
+            elsif md = /^(\()/.match(str)
+              str = md.post_match
+              in_paren = in_paren + 1
+              default = default + md[1]
+            elsif in_paren > 0 && md = /^(\))/.match(str)
+              str = md.post_match
+              in_paren = in_paren - 1
+              default = default + md[1]
+            elsif md = /^(\w+)/.match(str)
+              str = md.post_match
+              default = default + md[1]
+            elsif in_paren == 0 && md = /^,/.match(str)
+              break
+            elsif md = /^(.)/.match(str)
+              str = md.post_match
+              default = default + md[1] 
+           end
+          end
         end
-        
+
         # Add parameter
         p = Parameter.new(name, type, default)
         add_parameter(p)
@@ -138,7 +194,7 @@ module Multimethod
         if ! str.empty? 
           if md = /^,/.match(str)
             str = md.post_match
-          elsif md = /^\)/.match(str)
+          elsif in_paren == 0 && md = /^\)/.match(str)
             break
           else
             raise NameError, "Syntax error in multimethod parameters: expected ',' or ')' at #{str.inspect}"
@@ -186,7 +242,7 @@ module Multimethod
 
     # Add self parameter at front.
     def add_self
-      add_parameter(Parameter.new('self', @mod)) if @parameter.empty?
+      add_parameter(Parameter.new('self', mod)) if @parameter.empty?
     end
 
 
