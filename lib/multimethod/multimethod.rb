@@ -164,7 +164,7 @@ module Multimethod
       # THREAD CRITICAL BEGIN
       if @dispatch[mod]
         @dispatch[mod] = false
-        $stderr.puts "Removing dispatch for #{mod.name}##{name}"
+        # $stderr.puts "Removing dispatch for #{mod.name}##{name}"
         mod.class_eval("remove_method #{name.inspect}")
       end
       # THREAD CRITICAL END
