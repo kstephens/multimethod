@@ -18,6 +18,7 @@ module Multimethod
     attr_accessor :file
     attr_accessor :line
 
+    attr_accessor :verbose
 
     def initialize(*opts)
       opts = Hash[*opts]
@@ -33,6 +34,8 @@ module Multimethod
 
       @method = nil
       @multimethod = nil
+
+      @verbose = nil
 
       @score = { }
 
@@ -73,22 +76,22 @@ module Multimethod
     # Scan
     def scan_string(str, need_names = true)
 
-      str.sub!(/^\s+/, '')
+      str.sub!(/\A\s+/, '')
 
-      if md = /^(\w+(::\w+)*)#(\w+)/.match(str)
+      if md = /\A(\w+(::\w+)*)#(\w+)/.match(str)
         str = md.post_match
-        @mod = md[1]
+        @mod = md[1] unless @mod
         @name = md[3]
-      elsif md = /^(\w+(::\w+)*)\.(\w+)/.match(str)
+      elsif md = /\A(\w+(::\w+)*)\.(\w+)/.match(str)
         str = md.post_match
-        @mod = md[1]
+        @mod = md[1] unless @mod
         @class_method = true
         @name = md[3]
-      elsif md  = /^(\w+(::\w+)*)?\s+def\s+(self\.)?(\w+)/.match(str)
+      elsif md  = /\A((\w+(::\w+)*)\s+)?def\s+(self\.)?(\w+)/.match(str)
         str = md.post_match
-        @mod = md[1]
-        @class_method = ! ! md[3]
-        @name = md[4]
+        @mod = md[2] unless @mod
+        @class_method = ! ! md[4]
+        @name = md[5]
       else
         raise NameError, "Syntax error in multimethod signature at #{str.inspect}"
       end
@@ -100,12 +103,14 @@ module Multimethod
       add_self
 
       # Parse parameter list.
-      if md = /^\(/i.match(str)
+      if md = /\A\(/.match(str)
         str = md.post_match
 
         str = scan_parameters_string(str, need_names)
 
-        if md = /^\)/i.match(str)
+        $stderr.puts "  str=#{str.inspect}" if @verbose
+
+        if md = /\A\)/.match(str)
           str = md.post_match
         else
           raise NameError, "Syntax error in multimethod parameters at #{str.inspect}"
@@ -117,91 +122,102 @@ module Multimethod
 
 
     def scan_parameters_string(str, need_names = true)
-      in_paren = 0
 
       # Add self parameter at front.
       add_self
 
-      # $stderr.puts "scan_parameters_string(#{str.inspect})"
+      $stderr.puts "scan_parameters_string(#{str.inspect})" if @verbose
 
       until str.empty?
         name = nil
         type = nil
         default = nil
         
-        str.sub!(/^\s+/, '')
+        str.sub!(/\A\s+/, '')
 
-        # $stderr.puts "  str=#{str.inspect}"
-        # $stderr.puts "  params=#{parameter_to_s}"
+        $stderr.puts "  str=#{str.inspect}" if @verbose
         
-        if md = /^(\w+(::\w+)*)\s+(\w+)/.match(str)
+        if md = /\A(\w+(::\w+)*)\s+(\w+)/s.match(str)
+          # $stderr.puts "   pre_match=#{md.pre_match.inspect}"
+          # $stderr.puts "   md[0]=#{md[0].inspect}"
           str = md.post_match
           type = md[1]
           name = md[3]
-        elsif md = /^(\*?\w+)/.match(str)
+        elsif md = /\A(\*?\w+)/s.match(str)
+          # $stderr.puts "   pre_match=#{md.pre_match.inspect}"
+          # $stderr.puts "   md[0]=#{md[0].inspect}"
           str = md.post_match
           type = nil
           name = md[1]
         else
-          raise NameError, "Syntax error in multimethod parameters: at #{str.inspect}"
+          raise NameError, "Syntax error in multimethod parameters: expected type and/or name at #{str.inspect}"
         end
         
+        $stderr.puts "  type=#{type.inspect}" if @verbose       
+        $stderr.puts "  name=#{name.inspect}" if @verbose       
+
         # Parse parameter default.
-        if md = /^\s*=\s*/.match(str)
+        if md = /\A\s*=\s*/.match(str)
           str = md.post_match
+
+          in_paren = 0
           default = ''
           until str.empty?
             # $stderr.puts "    default: str=#{str.inspect}"
             # $stderr.puts "    default: params=#{parameter_to_s}"
 
-            if md = /^(\s+)/.match(str)
+            if md = /\A(\s+)/s.match(str)
               str = md.post_match
               default = default + md[1]
             end
 
-            if md = /^("([^"\\]|\\.)*")/.match(str)
+            if md = /\A("([^"\\]|\\.)*")/s.match(str)
               str = md.post_match
               default = default + md[1]
-            elsif md = /^('([^'\\]|\\.)*')/.match(str)
+            elsif md = /\A('([^'\\]|\\.)*')/s.match(str)
               str = md.post_match
               default = default + md[1]
-            elsif md = /^(\()/.match(str)
+            elsif md = /\A(\()/.match(str)
               str = md.post_match
               in_paren = in_paren + 1
               default = default + md[1]
-            elsif in_paren > 0 && md = /^(\))/.match(str)
+            elsif in_paren > 0 && md = /\A(\))/s.match(str)
               str = md.post_match
               in_paren = in_paren - 1
               default = default + md[1]
-            elsif md = /^(\w+)/.match(str)
+            elsif in_paren == 0 && md = /\A,/s.match(str)
+              break
+            elsif md = /\A(\w+)/s.match(str)
               str = md.post_match
               default = default + md[1]
-            elsif in_paren == 0 && md = /^,/.match(str)
-              break
-            elsif md = /^(.)/.match(str)
+            elsif md = /\A(.)/s.match(str)
               str = md.post_match
               default = default + md[1] 
-           end
+            end
           end
         end
 
         # Add parameter
         p = Parameter.new(name, type, default)
         add_parameter(p)
+        $stderr.puts "  params=#{parameter_to_s}" if @verbose       
 
         # Parse , or )
-        str.sub!(/^\s+/, '')
+        str.sub!(/\A\s+/, '')
         if ! str.empty? 
-          if md = /^,/.match(str)
+          if md = /\A,/s.match(str)
             str = md.post_match
-          elsif in_paren == 0 && md = /^\)/.match(str)
+          elsif md = /\A\)/s.match(str)
+            $stderr.puts "  DONE: #{to_s}\n  Remaining: #{str.inspect}" if @verbose
             break
           else
             raise NameError, "Syntax error in multimethod parameters: expected ',' or ')' at #{str.inspect}"
           end
         end
-        
+ 
       end
+
+      $stderr.puts "scan_parameters_string(...): DONE: #{to_s}\n  Remaining: #{str}" if @verbose
 
       str
     end
@@ -346,7 +362,8 @@ module Multimethod
       name ||= @name || '_'
       p = @parameter.clone
       rcvr = p.shift
-      "#{mod.name}##{name}(#{to_ruby_arg})"
+      m = mod
+      "#{m && m.name}##{name}(#{to_ruby_arg})"
     end
 
 

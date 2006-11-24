@@ -30,6 +30,13 @@ module Multimethod
     end
 
 
+    def new_method_from_signature(signature)
+      m = Method.new(gensym(name), signature)
+      add_method(m)
+      m
+    end
+
+
     def add_method(method)
       # THREAD CRITICAL BEGIN
       @method.push(method)

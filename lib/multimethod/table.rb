@@ -21,29 +21,28 @@ module Multimethod
     @@match_def = /^\s*def\s+(\w+)([(](.*)[)])?/
     # Interface to Multimethod::Module mixin multimethod
     def install_method(mod, body, file = nil, line = nil)
-      name = nil
-      params = nil
+      verbose = nil
+      #if body =~ /def bar\(x, y\)/
+      #  verbose = 1
+      #end
 
-      # Parse first line.
-      if md = body.match(@@match_def)
-        name = md[1]
-        params = md[3] || ''
-      else
-        raise("Cannot determine name(params) from body")
-      end
-        
+      signature = Signature.new
+      signature.mod = mod
+      signature.verbose = verbose
+      
+      new_body = signature.scan_string(body.clone)
+      
       # Get our Multimethod for this
-      mm = lookup_multimethod(name)
+      mm = lookup_multimethod(signature.name)
       mm.install_dispatch(mod)
-      m = mm.new_method(mod, name, params)
+      m = mm.new_method_from_signature(signature)
  
       # Evaluate our method.
-      new_body = body.clone
-      new_body.sub!(@@match_def, m.to_ruby_def)
+      new_body = m.to_ruby_def + new_body
 
-      # if m.restarg
+      #if true || m.signature.restarg
       #   $stderr.puts "install_method(#{mod}) => #{m.to_ruby_signature}:\n#{new_body}"
-      # end
+      #end
 
       file ||= __FILE__; line ||= __LINE__
       m.file = file; m.line = line

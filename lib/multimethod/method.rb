@@ -8,14 +8,20 @@ module Multimethod
     attr_accessor :file
     attr_accessor :line
 
-    def initialize(impl_name, mod, name, params)
-      raise NameError, "multimethod method name not specified" unless name && name.to_s.size > 0
-      raise NameError, "multimethod method impl_name not specified" unless impl_name && impl_name.to_s.size > 0
+    def initialize(impl_name, *args)
+      if args.size == 1
+        @signature = args[0]
+      else
+        mod, name, params = *args
+        raise NameError, "multimethod method name not specified" unless name && name.to_s.size > 0
+        raise NameError, "multimethod method impl_name not specified" unless impl_name && impl_name.to_s.size > 0
+        
+        @signature = Signature.new(:mod => mod, :name => name, :parameter => params)
+      end
 
       impl_name = Multimethod.normalize_name(impl_name)
 
       @impl_name = impl_name
-      @signature = Signature.new(:mod => mod, :name => name, :parameter => params)
     end
     
 
