@@ -16,7 +16,10 @@ module Multimethod
     end
 
 
+    # A list of all Multimethod objects.
     attr_accessor :multimethod
+
+    # Creates a new Table object.
     def initialize(*opts)
       @multimethod_by_name = { }
       @multimethod = [ ]

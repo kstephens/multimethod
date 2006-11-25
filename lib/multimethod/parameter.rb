@@ -9,25 +9,37 @@ module Multimethod
   #
   # Restarg parameters have a lower score than other arguments.
   #
-  # Parameters are typed unlike Ruby parameters.
-  #
-  # Untyped parameters default to Kernel.
+  # Unlike Ruby parameters, Parameters are typed.  Unspecified Parameter types default to Kernel.
   #
   class Parameter
     include Comparable
 
     # The score used for all restarg Parameters.
     RESTARG_SCORE = 9999
-
+    
+    # The Parameter name.
     attr_accessor :name
+
+    # The Parameter's offset in the Signature's parameter list.
+    # Parameter 0 is the implied "self" Parameter.
     attr_accessor :i
+
+    # The Paremeter's type, defaults to Kernel.
     attr_accessor :type
+
+    # The Parameter's default value expression.
     attr_accessor :default
+
+    # True if the Parameter is a restarg: e.g.: "*args"
     attr_accessor :restarg
 
+    # The Parameter's owning Signature.
     attr_accessor :signature
+
+    # Defines level of verbosity during processing.
     attr_accessor :verbose
 
+    # Initialize a new Parameter.
     def initialize(name = nil, type = nil, default = nil, restarg = false)
       # $stderr.puts "initialize(#{name.inspect}, #{type}, #{default.inspect}, #{restarg.inspect})"
       if name
@@ -160,10 +172,11 @@ module Multimethod
     end
 
 
-    # Returns a list of all Modules from most-specialized
+    # Returns a list of all parent Modules of an argument type,
+    # including itself, in most-specialized
     # to least-specialized order.
-    def all_types(arg)
-      arg.ancestors
+    def all_types(arg_type)
+      arg_type.ancestors
     end
 
 

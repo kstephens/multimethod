@@ -1,5 +1,6 @@
 module Multimethod
 
+  # See Multimethod::ObjectExtension::ClassMethods
   module ObjectExtension
     def self.append_features(base) # :nodoc:
       # puts "append_features{#{base}}"
@@ -7,7 +8,25 @@ module Multimethod
       base.extend(ClassMethods)
     end
 
+
+    # This module is included into Object
+    # It is the "glue" for Multmethod.
     module ClassMethods
+      # Installs a new Multimethod Method using the multimethod syntax:
+      #
+      #    class A
+      #      multimethod q{
+      #        def foo(x)
+      #          ...
+      #        end
+      #      }
+      #      multimethod q{
+      #        def foo(A x)
+      #        end
+      #      }
+      #    end
+      #
+      # Interfaces to Multimethod::Table.instance.
       def multimethod(body, file = nil, line = nil)
         unless file && line
           fileline = caller(1)[0]
@@ -25,6 +44,11 @@ module Multimethod
         ::Multimethod::Table.instance.install_method(self, body, file, line)
       end
 
+      # Removes a Multimethod using a signature:
+      #
+      #    class A
+      #      remove_multimethod "def foo(A x)"
+      #    end
       def remove_multimethod(signature)
         ::Multimethod::Table.instance.remove_method(signature)
       end

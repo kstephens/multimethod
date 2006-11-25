@@ -10,15 +10,20 @@ module Multimethod
   # relative scoring of the Method Signature.
   #
   class Method
+    # The Method's Signature used for relative scoring of applicability to an argument list.
     attr_accessor :signature
+    
+    # The Method's underlying method name.
+    # This method name is unique.
     attr_accessor :impl_name
 
+    # The Method's Multimethod.
     attr_accessor :multimethod
 
     # Initialize a new Method.
     # 
-    # Method.new(impl_name, signature)
-    # Method.new(impl_name, mod, name, parameter_list)
+    #   Method.new(impl_name, signature)
+    #   Method.new(impl_name, mod, name, parameter_list)
     def initialize(impl_name, *args)
       if args.size == 1
         @signature = args[0]

@@ -8,10 +8,16 @@ module Multimethod
   #
   class Multimethod
 
+    # The Multimethod's name.
     attr_accessor :name
+
+    # A list of Method's that implement this Multimethod.
     attr_accessor :method
+
+    # The Multimethod::Table that owns this Multimethod.
     attr_accessor :table
 
+    # Initialize a new Multimethod.
     def initialize(name, *opts)
       raise NameError, "multimethod name not specified" unless name && name.to_s.size > 0
  

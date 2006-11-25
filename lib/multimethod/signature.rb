@@ -10,22 +10,41 @@ module Multimethod
   class Signature
     include Comparable
 
-    attr_accessor :mod          # The Module the signature is bound to.
-    attr_accessor :class_method # True if the signature is bound to the class.
-    attr_accessor :name         # The name of the method signature.
-    attr_accessor :parameter    # The parameters of the method, self included.
+    # The Module that the Signature is bound to.
+    attr_accessor :mod
 
-    attr_accessor :min_args     # The minimum # of arguments for this signature
-    attr_accessor :max_args     # The maximum # of arguments for this signature;
-                                #   May be nil, if restargs
-    attr_accessor :restarg      # The "*args" parameter or nil
-    attr_accessor :default      # The first parameter with a default value.
+    # True if the signature is bound to the class.          
+    attr_accessor :class_method 
 
+    # The name of the method.
+    attr_accessor :name
+
+    # The list of Parameters, self is included at position 0.         
+    attr_accessor :parameter
+
+    # The minimum # of arguments for this signature.
+    attr_accessor :min_args
+
+    # The maximum # of arguments for this signature.
+    # May be nil, if this Signature accepts restargs.
+    attr_accessor :max_args
+                          
+    # The "*args" parameter or nil.      
+    attr_accessor :restarg
+
+    # The first Parameter with a default value.
+    attr_accessor :default
+
+    # The file where this Signature is specified.
     attr_accessor :file
+
+    # The line in the file where this Signature is specified.
     attr_accessor :line
 
+    # Defines level of verbosity during processing.
     attr_accessor :verbose
 
+    # Initialize a new Signature.
     def initialize(*opts)
       opts = Hash[*opts]
 
@@ -240,9 +259,11 @@ module Multimethod
     end
 
 
-    # Score of this Signature based on the argument types
-    # This score is a list of values that when sorted will
-    # place the best matching Signature at the begining of the list.
+    # Score of this Signature based on the argument types.
+    #
+    # The score is an Array of values that when sorted against 
+    # other Signature scores will
+    # place the best matching Signature at the top of the list.
     def score(args)
       
       if @min_args > args.size
@@ -277,8 +298,7 @@ module Multimethod
     end
     
 
-    # Score of this Signature based on the argument types
-    # using a cache.
+    # Score of this Signature using a cache.
     def score_cached(args)
       unless x = @score[args]
         x = @score[args] =
@@ -301,6 +321,7 @@ module Multimethod
     end
 
  
+    # Returns a String representing this Signature.
     def to_s(name = nil)
       name ||= @name || '_'
       p = @parameter.clone
@@ -309,18 +330,21 @@ module Multimethod
     end
 
 
+    # Returns a String representing this Signature's Parameters.
     def parameter_to_s(p = nil)
       p ||= @parameter
       p.collect{|x| x.to_s}.join(', ')
     end
 
 
+    # Returns a String representing this Signature's definition in Ruby syntax.
     def to_ruby_def(name = nil)
       name ||= @name || '_'
       "def #{name}(#{to_ruby_arg})"
     end
 
 
+    # Returns a String representing this Signature's definition in Ruby Doc syntax.
     def to_ruby_signature(name = nil)
       name ||= @name || '_'
       p = @parameter.clone
@@ -330,13 +354,14 @@ module Multimethod
     end
 
 
+    # Returns a String representing this Signature's definition parameters in Ruby syntax.
     def to_ruby_arg
       x = @parameter.clone
       x.shift
       x.collect{|x| x.to_ruby_arg}.join(', ')
     end
 
-
+    # Calls #to_s.
     def inspect
       to_s
     end
