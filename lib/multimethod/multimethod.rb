@@ -1,4 +1,11 @@
 module Multimethod
+  # Represents a Multimethod.
+  #
+  # A Multimethod has multiple implementations of a method based on the relative scoring
+  # of the Methods based on the argument types of the message.
+  # 
+  # A Multimethod has a name.
+  #
   class Multimethod
 
     attr_accessor :name
@@ -17,19 +24,22 @@ module Multimethod
     end
 
 
+    # Generates a unique symbol for a method name.
+    # Method implementations will use a unique name for the implementation method.
+    # For example, for a Multimethod named "foo", the Method name might be "_multimethod_12_foo".
     def gensym(name = nil)
       name ||= @name
       "_multimethod_#{@name_i = @name_i + 1}_#{name}"
     end
 
-
+    # Creates a new Method object bound to mod by name.
     def new_method(mod, name, *args)
       m = Method.new(gensym(name), mod, name, *args)
       add_method(m)
       m
     end
 
-
+    # Create a new Method object using the Signature.
     def new_method_from_signature(signature)
       m = Method.new(gensym(name), signature)
       add_method(m)
@@ -37,6 +47,7 @@ module Multimethod
     end
 
 
+    # Adds the new Method object to this Multimethod.
     def add_method(method)
       # THREAD CRITICAL BEGIN
       remove_method(method.signature)
@@ -47,18 +58,20 @@ module Multimethod
     end
 
 
+    # Returns true if this Multimethod matches the Signature.
     def matches_signature(signature)
       @name == signature.name
     end
 
 
+    # Returns a list of all Methods that match the Signature.
     def find_method(signature)
       m = @method.select{|x| x.matches_signature(signature)}
 
       m
     end
 
-
+    # Removes the method.
     def remove_method(x)
       case x
       when Signature
@@ -139,6 +152,8 @@ module Multimethod
     end
 
 
+    # Returns a sorted list of scores and Methods that
+    # match the argument types.
     def score_methods(meths, args)
       scores = meths.collect do |meth|
         score = meth.score_cached(args)
@@ -160,17 +175,8 @@ module Multimethod
     end
 
 
-    def remove_dispatch(mod)
-      # THREAD CRITICAL BEGIN
-      if @dispatch[mod]
-        @dispatch[mod] = false
-        # $stderr.puts "Removing dispatch for #{mod.name}##{name}"
-        mod.class_eval("remove_method #{name.inspect}")
-      end
-      # THREAD CRITICAL END
-    end
-
-
+    # Installs a dispatching method in the Module.
+    # This method will dispatch to the Multimethod for Method lookup and application.
     def install_dispatch(mod)
       # THREAD CRITICAL BEGIN
       unless @dispatch[mod]
@@ -182,6 +188,18 @@ def #{name}(*args)
 end
 end_eval
 # $stderr.puts "install_dispatch = #{body}"
+      end
+      # THREAD CRITICAL END
+    end
+
+
+    # Removes the dispatching method in the Module.
+    def remove_dispatch(mod)
+      # THREAD CRITICAL BEGIN
+      if @dispatch[mod]
+        @dispatch[mod] = false
+        # $stderr.puts "Removing dispatch for #{mod.name}##{name}"
+        mod.class_eval("remove_method #{name.inspect}")
       end
       # THREAD CRITICAL END
     end

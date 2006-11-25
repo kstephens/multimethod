@@ -1,5 +1,12 @@
 module Multimethod
 
+  # Represents a method signature.
+  # 
+  # A Signature has a bound Module, a name and a Parameter list.
+  #
+  # Each Parameter contributes to the scoring of the Method based
+  # on the message argument types, including the message receiver.
+  #
   class Signature
     include Comparable
 
@@ -53,7 +60,7 @@ module Multimethod
     end
     
 
-    # For sort
+    # Compares two Signature objects.
     def <=>(s)
       x = @name.to_s <=> s.name.to_s 
       x = (! @class_method == ! s.class_method ? 0 : 1) if x == 0
@@ -63,6 +70,7 @@ module Multimethod
     end
 
 
+    # Returns the bound Module.
     def mod
       # THREAD CRITICAL BEGIN
       if @mod && @mod.kind_of?(String)
@@ -76,7 +84,7 @@ module Multimethod
     end
 
 
-    # Scan
+    # Scan a string as a Signature, e.g.: "def foo(A a, x = true, *restargs)"
     def scan_string(str, need_names = true)
 
       str.sub!(/\A\s+/, '')
@@ -124,6 +132,9 @@ module Multimethod
     end
 
 
+    # Scan the parameter string of a Signature:
+    #
+    #   "A a, x = true, *restargs"
     def scan_parameters_string(str, need_names = true)
       # @verbose = true
 
@@ -161,6 +172,10 @@ module Multimethod
     end
 
 
+    # Scan a programmatic Parameter list:
+    #
+    #   [ A, :a, B, :b, :c, '*d' ]
+    #
     def scan_parameters(params)
       # Add self parameter at front.
       add_self
@@ -194,12 +209,13 @@ module Multimethod
     end
     
 
-    # Add self parameter at front.
+    # Add the implicit "self" parameter at the front of the Parameter list.
     def add_self
       add_parameter(Parameter.new('self', mod)) if @parameter.empty?
     end
 
-
+    
+    # Adds a new Parameter.
     def add_parameter(p)
       if p.restarg
         raise("Too many restargs") if @restarg
@@ -224,15 +240,9 @@ module Multimethod
     end
 
 
-    def score_cached(args)
-      unless x = @score[args]
-        x = @score[args] =
-          score(args)
-      end
-      x
-    end
-
-
+    # Score of this Signature based on the argument types
+    # This score is a list of values that when sorted will
+    # place the best matching Signature at the begining of the list.
     def score(args)
       
       if @min_args > args.size
@@ -267,6 +277,21 @@ module Multimethod
     end
     
 
+    # Score of this Signature based on the argument types
+    # using a cache.
+    def score_cached(args)
+      unless x = @score[args]
+        x = @score[args] =
+          score(args)
+      end
+      x
+    end
+
+
+
+    # Returns the Parameter at argument position i.
+    # If the Signature has a restarg, it will be used for
+    # argument postitions past the end of the Parameter list.
     def parameter_at(i)
       if i >= @parameter.size && @restarg
         @restarg

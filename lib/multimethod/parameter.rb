@@ -1,7 +1,22 @@
 module Multimethod
+
+  # Represents a Parameter in a Signature.
+  #
+  # A Parameter has a name, type and position.
+  #
+  # Parameters may also have a default value or may be a restarg, a parameter that
+  # collects all remaining arguments.
+  #
+  # Restarg parameters have a lower score than other arguments.
+  #
+  # Parameters are typed unlike Ruby parameters.
+  #
+  # Untyped parameters default to Kernel.
+  #
   class Parameter
     include Comparable
 
+    # The score used for all restarg Parameters.
     RESTARG_SCORE = 9999
 
     attr_accessor :name
@@ -44,16 +59,18 @@ module Multimethod
       @name = name
     end
 
-
+    # Compare two Parameters.
+    # Only type and restarg are significant.
     def <=>(p)
       x = @type <=> p.type 
       x = ! @restarg == ! p.restarg ? 0 : 1 if x == 0
-      x = ! @default == ! p.default ? 0 : 1 if x == 0
+      # x = ! @default == ! p.default ? 0 : 1 if x == 0
       # $stderr.puts "#{to_s} <=> #{p.to_s} => #{x.inspect}"
       x
     end
 
 
+    # Scan a string for a Parameter specification.
     def scan_string(str, need_names = true)
       str.sub!(/\A\s+/, '')
       
@@ -130,17 +147,27 @@ module Multimethod
     end
 
 
+    # Returns the score of this Parameter matching an argument type.
+    #
+    # The score is determined by the relative distance of the Parameter
+    # to the argument type.  A lower distance means a tighter match
+    # of this Parameter.
+    #
+    # Restarg Parameters score lower, see RESTARG_SCORE.
     def score(arg)
       return RESTARG_SCORE if @restarg
       score = all_types(arg).index(type_object)
     end
 
 
+    # Returns a list of all Modules from most-specialized
+    # to least-specialized order.
     def all_types(arg)
       arg.ancestors
     end
 
 
+    # Resolves type by name
     def type_object
       if @type.kind_of?(String)
         @type = Table.instance.name_to_object(@type, 
@@ -152,16 +179,20 @@ module Multimethod
     end
 
 
+    # Returns a String representing this Parameter in a Signature string.
     def to_s
       "#{@type} #{to_ruby_arg}"
     end
     
 
+    # Return a String representing this Parameter as a Ruby method parameter.
     def to_ruby_arg
       "#{to_s_name}#{@default ? ' = ' + @default : ''}"
     end
 
 
+    # Return a String representing this Parameter's name.
+    # Restargs will be prefixed with '*'.
     def to_s_name
       (@restarg ? "*" : '') + (@name.to_s || "_arg_#{@i}")
     end

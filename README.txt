@@ -15,7 +15,7 @@ gem install multimethod
 The RubyForge package multimethod
 implements multi-method dispatching on argument types.
 
-See also: ?????http://umleta.com/node/?????
+See also: http://umleta.com/node/7
 
 == Home page
 

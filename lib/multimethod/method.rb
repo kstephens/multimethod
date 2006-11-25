@@ -1,11 +1,24 @@
 module Multimethod
 
+  # Represents a Method implementation in a Multimethod.
+  #
+  # A Method is bound to a Module using a unique implementation name for the Multimethod.
+  #
+  # A Multimethod may have multiple implementation Methods.
+  #
+  # The Multimethod is responsible for determining the correct Method based on the
+  # relative scoring of the Method Signature.
+  #
   class Method
     attr_accessor :signature
     attr_accessor :impl_name
 
     attr_accessor :multimethod
 
+    # Initialize a new Method.
+    # 
+    # Method.new(impl_name, signature)
+    # Method.new(impl_name, mod, name, parameter_list)
     def initialize(impl_name, *args)
       if args.size == 1
         @signature = args[0]
@@ -23,19 +36,20 @@ module Multimethod
     end
     
 
+    # Returns true if this Method matches the Signature.
     def matches_signature(signature)
       @signature == signature
     end
 
 
+    # Remove the method implementation from the receiver Module.
     def remove_implementation
-      # Remove the method implementation
       # $stderr.puts "Removing implementation for #{signature.to_s} => #{impl_name}"
       signature.mod.class_eval("remove_method #{impl_name.inspect}")
     end
 
 
-    # For score sort
+    # Returns 0.
     def <=>(x)
       0
     end
@@ -47,40 +61,50 @@ module Multimethod
     end
 
 
-    # Scoring this method.
+    # Score of this Method based on the argument types.
+    # The receiver type is the first element of args.
     def score(args)
       @signature.score(args)
     end
 
 
+    # Score this Method based on the argument types
+    # using a cache.
     def score_cached(args)
       @signature.score_cached(args)
     end
 
 
+    # Returns a string representation using the 
+    # implementation name.
     def to_s(name = nil)
       name ||= @impl_name
       @signature.to_s(name)
     end
 
 
+    # Returns the "def foo(...)" string
+    # using the implementation name by default.
     def to_ruby_def(name = nil)
       name ||= @impl_name
       @signature.to_ruby_def(name)
     end
 
 
+    # Returns a ruby signature
+    # using the implementation name by default.
     def to_ruby_signature(name = nil)
       name ||= @impl_name
       @signature.to_ruby_signature(name)
     end
 
 
+    # Returns a string representing the Ruby parameters.
     def to_ruby_arg
       @signature.to_ruby_arg
     end
 
-
+    # Same as #to_s.
     def inspect
       to_s
     end

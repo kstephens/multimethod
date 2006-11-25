@@ -24,12 +24,12 @@ module Multimethod
         
         ::Multimethod::Table.instance.install_method(self, body, file, line)
       end
-    end
 
-    def remove_multimethod(signature)
-      ::Multimethod::Table.instance.remove_method(signature)
-    end
+      def remove_multimethod(signature)
+        ::Multimethod::Table.instance.remove_method(signature)
+      end
 
+    end # mixin
   end # class
 end # module
 
