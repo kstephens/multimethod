@@ -2,8 +2,8 @@
 
 == Release 0.1.0: 2006/11/24
 
-* Better internal design.
 * Multimethods can be added and removed.
+* Better internal design: signatures vs methods.
 * TODO
   *  Fix how default parameters are scored.
 

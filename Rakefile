@@ -45,6 +45,7 @@ def get_release_notes(relfile = "Releases.txt")
     end
   end
 
+  $stderr.puts "Release #{release.inspect}"
   [ release, notes.join('') ]
 end
 
@@ -96,16 +97,14 @@ task :update_version do
   end
 end
 
-task version_rb => :update_version
-
-# task :test => :update_version
+# task package => :update_version
 
 #################################################################
 # SVN
 #
 
 task :svn_release do
-  system("svn cp -m 'Release #{PKG_VERSION}' . #{PKG_SVN_ROOT}/release/#{PKG_VERSION}")
+  sh %{svn cp -m 'Release #{PKG_VERSION}' . #{PKG_SVN_ROOT}/release/#{PKG_VERSION}}
 end
 
 
@@ -140,4 +139,11 @@ task :rubyfiles do
   puts Dir['**/*.rb'].reject { |fn| fn =~ /^pkg/ }
   puts Dir['bin/*'].reject { |fn| fn =~ /CVS|.svn|(~$)|(\.rb$)/ }
 end
+
+task :make_manifest do 
+  open("Manifest.txt", "w") do |f|
+    f.puts Dir['**/*'].reject { |fn| ! test(?f, fn) || fn =~ /CVS|.svn|(~$)/ }.sort.join("\n") + "\n"
+  end
+end
+
 
