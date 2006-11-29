@@ -1,3 +1,8 @@
+2006-11-29  Kurt A. Stephens  <kurt@umleta.com>
+
+	* Major cleanup and documentation
+	* Fixed default parameter scoring.
+
 2006-11-18  Kurt A. Stephens  <kurt@umleta.com>
 
 	* Initial release

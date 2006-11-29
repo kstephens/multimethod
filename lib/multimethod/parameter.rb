@@ -14,8 +14,14 @@ module Multimethod
   class Parameter
     include Comparable
 
+    # The score base used for all Parameters with defaults.
+    DEFAULT_SCORE_BASE = 200
+
+    # The score used for all Parameters with defaults and no argument.
+    DEFAULT_SCORE = DEFAULT_SCORE_BASE + 100
+
     # The score used for all restarg Parameters.
-    RESTARG_SCORE = 9999
+    RESTARG_SCORE = DEFAULT_SCORE + 100
     
     # The Parameter name.
     attr_accessor :name
@@ -76,7 +82,7 @@ module Multimethod
     def <=>(p)
       x = @type <=> p.type 
       x = ! @restarg == ! p.restarg ? 0 : 1 if x == 0
-      # x = ! @default == ! p.default ? 0 : 1 if x == 0
+      x = ! @default == ! p.default ? 0 : 1 if x == 0
       # $stderr.puts "#{to_s} <=> #{p.to_s} => #{x.inspect}"
       x
     end
@@ -165,10 +171,19 @@ module Multimethod
     # to the argument type.  A lower distance means a tighter match
     # of this Parameter.
     #
-    # Restarg Parameters score lower, see RESTARG_SCORE.
+    # Parameters with restargs or unspecfied default arguments score lower, see RESTARG_SCORE, DEFAULT_SCORE.
     def score(arg)
-      return RESTARG_SCORE if @restarg
-      score = all_types(arg).index(type_object)
+      if @restarg
+        score = RESTARG_SCORE
+      elsif @default && ! arg
+        score = DEFAULT_SCORE
+      else
+        score = all_types(arg).index(type_object) 
+      end
+
+      # $stderr.puts "  score(#{signature.to_s}, #{to_s}, #{arg && arg.name}) => #{score}"
+
+      score
     end
 
 

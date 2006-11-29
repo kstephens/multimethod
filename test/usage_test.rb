@@ -47,39 +47,54 @@ class C < Object
   include Comparable
 end
 
+
 class D < B
   # Variadic
   multimethod %q{
-def bar(x)
-  x = "D#bar(x) : (#{x.class.name})"
+def bbb(x)
+  x = "D#bbb(x) : (#{x.class.name})"
   x
 end
 }
 
   multimethod %q{
-def bar(*rest)
-  x = "D#bar(*rest) : (#{rest.inspect})"
+def bbb(*rest)
+  x = "D#bbb(*rest) : (#{rest.collect{|x| x.class}.inspect})"
   x
 end
 }
 
   multimethod %q{
-def bar(x, y)
-  x = "D#bar(x, y) : (#{x.class.name}, #{y.class.name})"
+def bbb(x, y)
+  x = "D#bbb(x, y) : (#{x.class.name}, #{y.class.name})"
   x
 end
 }
 
   multimethod %q{
-def bar(x, y, A a)
-  x = "D#bar(x, y, A a) : (#{x.class.name}, #{y.class.name}, #{a.class.name})"
+def bbb(Fixnum x, String y)
+  x = "D#bbb(Fixnum x, String y) : (#{x.class.name}, #{y.class.name})"
   x
 end
 }
 
   multimethod %q{
-def bar(x, y, *rest)
-  x = "D#bar(x, y, *rest) : (#{x.class.name}, #{y.class.name}, #{rest.inspect})"
+def bbb(Fixnum x, Fixnum y = 1)
+  x = "D#bbb(Fixnum x, Fixnum y = 1) : (#{x.class.name}, #{y.class.name})"
+  x
+end
+}
+
+  multimethod %q{
+def bbb(x, String y, A a)
+  x = "D#bbb(x, String y, A a) : (#{x.class.name}, #{y.class.name}, #{a.class.name})"
+  x
+end
+}
+
+  multimethod %q{
+def bbb(Fixnum x, y, *rest)
+  x = "D#bbb(Fixnum x, y, *rest) : (#{x.class.name}, #{y.class.name}, #{rest.collect{|x| x.class}.inspect})"
   x
 end
 }
@@ -125,20 +140,38 @@ module Multimethod
       a = A.new
       d = D.new
 
-      assert_equal 'D#bar(*rest) : ([])',
-        d.bar()
+      assert_not_nil bbb_mm = ::Multimethod::Table.instance.multimethod.select{|mm| mm.name == 'bbb'}
+      assert_equal 1, bbb_mm.size
+      assert_kind_of ::Multimethod::Multimethod, bbb_mm = bbb_mm[0]
 
-      assert_equal 'D#bar(x) : (Fixnum)',
-        d.bar(1)
+      assert_equal 7, bbb_mm.method.size
+      
+      assert_equal 'D#bbb(*rest) : ([])',
+        d.bbb()
 
-      assert_equal 'D#bar(x, y) : (Fixnum, String)' ,   
-        d.bar(1, 'a')
+      assert_equal 'D#bbb(x) : (Symbol)',
+        d.bbb(:x)
 
-      assert_equal 'D#bar(x, y, A a) : (Fixnum, String, A)' , 
-        d.bar(1, 'a', a)
+      assert_equal 'D#bbb(Fixnum x, String y) : (Fixnum, String)' ,   
+        d.bbb(1, 'a')
 
-      assert_equal 'D#bar(x, y, *rest) : (Fixnum, String, [3])' , 
-        d.bar(1, 'a', 3)
+      assert_equal 'D#bbb(Fixnum x, Fixnum y = 1) : (Fixnum, Fixnum)' ,   
+        d.bbb(1, 2)
+
+      assert_equal 'D#bbb(x, y) : (Symbol, Symbol)' ,   
+        d.bbb(:x, :y)
+
+      assert_equal 'D#bbb(*rest) : ([Symbol, D, D])' ,   
+        d.bbb(:x, d, d)
+
+      assert_equal 'D#bbb(Fixnum x, y, *rest) : (Fixnum, String, [A])' , 
+        d.bbb(1, 'a', a)
+
+      assert_equal 'D#bbb(x, String y, A a) : (String, String, A)' , 
+        d.bbb('a', 'b', a)
+
+      assert_equal 'D#bbb(Fixnum x, y, *rest) : (Fixnum, String, [Fixnum])' , 
+        d.bbb(1, 'a', 3)
     end
 
   end # class

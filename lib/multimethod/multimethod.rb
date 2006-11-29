@@ -175,7 +175,7 @@ module Multimethod
       scores.compact!
       scores.sort!
       
-      # $stderr.puts "score_methods(#{args.inspect}) => \n#{scores.inspect}"
+      # $stderr.puts %{  score_methods(#{args.inspect}) => \n#{scores.collect{|x| x.inspect}.join("\n")}}
 
       scores
     end

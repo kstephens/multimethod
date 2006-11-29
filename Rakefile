@@ -30,7 +30,7 @@ def get_release_notes(relfile = "Releases.txt")
 
   File.open(relfile) do |f|
     while ! f.eof? && line = f.readline
-      if md = /^== Release ([\d\.]+)/i.match(line)
+      if md = /^=+ Release ([\d\.]+)/i.match(line)
         release = md[1]
         notes << line
         break
@@ -38,14 +38,14 @@ def get_release_notes(relfile = "Releases.txt")
     end
 
     while ! f.eof? && line = f.readline
-      if md = /^== Release ([\d\.]+)/i.match(line)
+      if md = /^=+ Release ([\d\.]+)/i.match(line)
         break
       end
       notes << line
     end
   end
 
-  $stderr.puts "Release #{release.inspect}"
+  # $stderr.puts "Release #{release.inspect}"
   [ release, notes.join('') ]
 end
 

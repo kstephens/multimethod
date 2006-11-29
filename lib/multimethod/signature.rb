@@ -32,7 +32,8 @@ module Multimethod
     # The "*args" parameter or nil.      
     attr_accessor :restarg
 
-    # The first Parameter with a default value.
+    # An Array of all Parameters with a default value.
+    # Will be nil if there is not a Parameter with a default values.
     attr_accessor :default
 
     # The file where this Signature is specified.
@@ -265,7 +266,6 @@ module Multimethod
     # other Signature scores will
     # place the best matching Signature at the top of the list.
     def score(args)
-      
       if @min_args > args.size
         # Not enough args
         score = nil
@@ -282,17 +282,17 @@ module Multimethod
         if @restarg || @default
           while (i = i + 1) < @parameter.size
             # $stderr.puts "  Adding score i=#{i}"
-            score << parameter_at(i).score(NilClass)
+            # nil means there is no argument for this parameter.
+            score << parameter_at(i).score(nil)
           end
         end
 
-        # If any argument cannot match, avoid this method.
+        # If any argument cannot match, avoid this method entirely.
+        score.flatten!
         score = nil if score.index(nil)
       end
 
-      # if true || @name =~ /_bar$/
-      #   $stderr.puts "    Method: score #{self.to_s} #{args.inspect} => #{score.inspect}"
-      # end
+      # $stderr.puts "  score(#{to_s}, #{args.inspect} => #{score.inspect})"
 
       score
     end
@@ -306,7 +306,6 @@ module Multimethod
       end
       x
     end
-
 
 
     # Returns the Parameter at argument position i.

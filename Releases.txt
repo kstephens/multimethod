@@ -1,14 +1,21 @@
 = Multimethod Release History
 
+== Release 0.2.0: 2006/11/29
+
+* Fixed default parameter scoring.
+* Added more documentation.
+* TODO:
+  * Need ambigious method test cases.
+
 == Release 0.1.0: 2006/11/24
 
 * Multimethods can be added and removed.
 * Better internal design: signatures vs methods.
 * TODO
-  *  Fix how default parameters are scored.
+  * Fix how default parameters are scored.
 
 == Release 0.0.1: 2006/11/18
 
 * Initial Release
 * TODO
-  *  Fix how default parameters are scored.
+  * Fix how default parameters are scored.
