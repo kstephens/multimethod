@@ -55,6 +55,7 @@ module Multimethod
 
       @i = nil
       @type = type
+      @type_object = nil
       @default = default
       @restarg = restarg
       @verbose = false
@@ -77,8 +78,8 @@ module Multimethod
       @name = name
     end
 
+
     # Compare two Parameters.
-    # Only type and restarg are significant.
     def <=>(p)
       x = @type <=> p.type 
       x = ! @restarg == ! p.restarg ? 0 : 1 if x == 0
@@ -171,6 +172,9 @@ module Multimethod
     # to the argument type.  A lower distance means a tighter match
     # of this Parameter.
     #
+    # If +arg+ is nil, this Parameter is being matched as
+    # a restarg or a parameter default.
+    #
     # Parameters with restargs or unspecfied default arguments score lower, see RESTARG_SCORE, DEFAULT_SCORE.
     def score(arg)
       if @restarg
@@ -197,13 +201,22 @@ module Multimethod
 
     # Resolves type by name
     def type_object
-      if @type.kind_of?(String)
-        @type = Table.instance.name_to_object(@type, 
-                                              @signature.mod, 
-                                              @signature.file, 
-                                              @signature.line)
+      unless @type_object
+        case @type
+        when NilClass
+          @type_object = Kernel
+        when Module
+          @type_object = @type
+        when String
+          @type_object = Table.instance.name_to_object(@type, 
+                                                       @signature.mod, 
+                                                       @signature.file, 
+                                                       @signature.line)
+        else
+          raise("Incorrect parameter type #{@type.inspect}")
+        end
       end
-      @type
+      @type_object
     end
 
 
