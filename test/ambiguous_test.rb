@@ -29,7 +29,7 @@ module Multimethod
     end
     
     def test_call
-      # assert_not_nil mm = Table.instance.lookup_multimethod(:amb)
+      assert_not_nil mm = Table.instance.lookup_multimethod(:amb)
       # mm.debug = 1
 
       a = Amb.new

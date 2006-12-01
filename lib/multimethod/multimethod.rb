@@ -149,8 +149,13 @@ module Multimethod
       if scores.empty?
         result = nil
       else
+        # Check for ambiguous methods.
+        if amb_methods = ambiguous_methods(scores)
+          raise NameError, "Ambiguous methods for multimethod '#{@name}' for (#{args.collect{|x| x.name}.join(', ')}): #{amb_methods.collect{|x| x.to_s}.join(', ')}"
+        end
+
+        # Select best scoring method.
         result = scores[0][1]
-        raise("Ambigious method") if scores.select{|x| x[0] == result}.size > 1
       end
 
       #if @name.to_s == 'bar'
@@ -160,6 +165,15 @@ module Multimethod
 
 
       result
+    end
+
+    def ambiguous_methods(scores)
+      # Check for additional methods with the same score as
+      # the first method.
+      scores = scores.select{|x| x[0] == scores[0][0]}
+
+      # Map to a list of signatures.
+      scores.size > 1 ? scores.collect{|x| x[1].signature} : nil
     end
 
 
