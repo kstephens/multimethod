@@ -2,7 +2,7 @@ module Multimethod
   # Represents a Multimethod.
   #
   # A Multimethod has multiple implementations of a method based on the relative scoring
-  # of the Methods based on the argument types of the message.
+  # of the argument types of the message.
   # 
   # A Multimethod has a name.
   #
@@ -147,11 +147,12 @@ module Multimethod
     def lookup_method_(args)
       scores = score_methods(@method, args)
       if scores.empty?
+        # Method not found.
         result = nil
       else
         # Check for ambiguous methods.
-        if amb_methods = ambiguous_methods(scores)
-          raise NameError, "Ambiguous methods for multimethod '#{@name}' for (#{args.collect{|x| x.name}.join(', ')}): #{amb_methods.collect{|x| x.to_s}.join(', ')}"
+        if result = ambiguous_methods(scores)
+          raise NameError, "Ambiguous methods for multimethod '#{@name}' for (#{args.collect{|x| x.name}.join(', ')}): #{result.collect{|x| x.to_s}.join(', ')}"
         end
 
         # Select best scoring method.
@@ -166,6 +167,7 @@ module Multimethod
 
       result
     end
+
 
     def ambiguous_methods(scores)
       # Check for additional methods with the same score as
