@@ -249,6 +249,7 @@ end_eval
       '&' => 'AND',
       '!' => 'NOT',
       '~' => 'TIL',
+      '_' => '',    # escape '_' as '_'
       nil => nil
     };
     @@name_map.delete(nil)
@@ -257,7 +258,7 @@ end_eval
 
     def self.normalize_name(name)
       name = name.to_s.clone
-      name.sub!(@@name_rx){|x| "_#{@@name_map[x] || '_'}_"}
+      name.gsub!(@@name_rx){|x| "_#{@@name_map[x] || '_'}_"}
 
       name.intern
     end
