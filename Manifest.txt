@@ -13,6 +13,7 @@ lib/multimethod/parameter.rb
 lib/multimethod/signature.rb
 lib/multimethod/table.rb
 test/add_remove_test.rb
+test/ambiguous_test.rb
 test/method_test.rb
 test/multimethod_test.rb
 test/parameter_test.rb

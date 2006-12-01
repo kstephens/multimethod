@@ -19,6 +19,9 @@ module Multimethod
     # A list of all Multimethod objects.
     attr_accessor :multimethod
 
+    # Enable debugging info.
+    attr_accessor :debug
+
     # Creates a new Table object.
     def initialize(*opts)
       @multimethod_by_name = { }

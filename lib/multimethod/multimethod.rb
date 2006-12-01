@@ -17,16 +17,21 @@ module Multimethod
     # The Multimethod::Table that owns this Multimethod.
     attr_accessor :table
 
+    # Enable debugging info.
+    attr_accessor :debug
+
     # Initialize a new Multimethod.
     def initialize(name, *opts)
       raise NameError, "multimethod name not specified" unless name && name.to_s.size > 0
- 
+      @debug = nil
+
       @name = name
       @name_i = 0
       @method = [ ]
       @dispatch = { }
 
       @lookup_method = { }
+      
     end
 
 
@@ -175,7 +180,7 @@ module Multimethod
       scores.compact!
       scores.sort!
       
-      # $stderr.puts %{  score_methods(#{args.inspect}) => \n#{scores.collect{|x| x.inspect}.join("\n")}}
+      $stderr.puts %{  score_methods(#{args.inspect}) => \n#{scores.collect{|x| x.inspect}.join("\n")}} if @debug
 
       scores
     end

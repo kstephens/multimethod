@@ -142,7 +142,7 @@ end
 
 task :make_manifest do 
   open("Manifest.txt", "w") do |f|
-    f.puts Dir['**/*'].reject { |fn| ! test(?f, fn) || fn =~ /CVS|.svn|(~$)/ }.sort.join("\n") + "\n"
+    f.puts Dir['**/*'].reject { |fn| ! test(?f, fn) || fn =~ /CVS|.svn|(~$)|(.gem$)|(^pkg\/)|(^doc\/)/ }.sort.join("\n") + "\n"
   end
 end
 
