@@ -44,13 +44,15 @@ module Multimethod
 
       i = i + 1
       assert_equal :c, m1.parameter[i].name
-      assert_equal Kernel, m1.parameter[i].type
+      assert_equal nil, m1.parameter[i].type
+      assert_equal Kernel, m1.parameter[i].type_object
       assert       !  m1.parameter[i].restarg
       assert       !       m1.parameter[i].default
 
       i = i + 1
       assert_equal :d, m1.parameter[i].name
-      assert_equal Kernel, m1.parameter[i].type
+      assert_equal nil, m1.parameter[i].type
+      assert_equal Kernel, m1.parameter[i].type_object
       assert       m1.parameter[i].restarg
       assert       !       m1.parameter[i].default
 
@@ -82,13 +84,15 @@ module Multimethod
 
       i = i + 1
       assert_equal :c, m1.parameter[i].name
-      assert_equal Kernel, m1.parameter[i].type
+      assert_equal nil, m1.parameter[i].type
+      assert_equal Kernel, m1.parameter[i].type_object
       assert       !  m1.parameter[i].restarg
       assert_equal 'nil', m1.parameter[i].default
 
       i = i + 1
       assert_equal :d, m1.parameter[i].name
-      assert_equal Kernel, m1.parameter[i].type
+      assert_equal nil, m1.parameter[i].type
+      assert_equal Kernel, m1.parameter[i].type_object
       assert       m1.parameter[i].restarg
       assert       !       m1.parameter[i].default
 

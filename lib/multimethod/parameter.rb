@@ -14,6 +14,11 @@ module Multimethod
   class Parameter
     include Comparable
 
+    @@debug = nil
+    def self.debug=(x)
+      @@debug = x
+    end
+
     # The score base used for all Parameters with defaults.
     DEFAULT_SCORE_BASE = 200
 
@@ -48,10 +53,6 @@ module Multimethod
     # Initialize a new Parameter.
     def initialize(name = nil, type = nil, default = nil, restarg = false)
       # $stderr.puts "initialize(#{name.inspect}, #{type}, #{default.inspect}, #{restarg.inspect})"
-      if name
-        # Default type if name is specified
-        type ||= Kernel
-      end
 
       @i = nil
       @type = type
@@ -80,10 +81,11 @@ module Multimethod
 
 
     # Compare two Parameters.
+    # Parameter name is insignificant.
     def <=>(p)
-      x = @type <=> p.type 
-      x = ! @restarg == ! p.restarg ? 0 : 1 if x == 0
-      x = ! @default == ! p.default ? 0 : 1 if x == 0
+      x = type_object <=> p.type_object
+      x = @restarg == p.restarg ? 0 : 1 if x == 0
+      x = @default == p.default ? 0 : 1 if x == 0
       # $stderr.puts "#{to_s} <=> #{p.to_s} => #{x.inspect}"
       x
     end
@@ -91,6 +93,12 @@ module Multimethod
 
     # Scan a string for a Parameter specification.
     def scan_string(str, need_names = true)
+      # @verbose ||= @@debug
+
+      type = nil
+      name = nil
+      default = nil
+
       str.sub!(/\A\s+/, '')
       
       $stderr.puts "  str=#{str.inspect}" if @verbose
@@ -154,12 +162,14 @@ module Multimethod
             str = md.post_match
             default = default + md[1] 
           end
+
+          $stderr.puts "  default=#{default.inspect}" if @verbose       
         end
       end
       
       self.name = name unless @name
-      type ||= Kernel
       self.type = type unless @type
+      default = nil if default && default.empty?
       self.default = default unless @default
 
       str
@@ -199,19 +209,19 @@ module Multimethod
     end
 
 
-    # Resolves type by name
+    # Resolves type name
     def type_object
       unless @type_object
         case @type
-        when NilClass
-          @type_object = Kernel
-        when Module
-          @type_object = @type
         when String
           @type_object = Table.instance.name_to_object(@type, 
-                                                       @signature.mod, 
-                                                       @signature.file, 
-                                                       @signature.line)
+                                                       @signature && @signature.mod, 
+                                                       @signature && @signature.file, 
+                                                       @signature && @signature.line)
+        when Module
+          @type_object = @type
+        when NilClass
+          @type_object = Kernel
         else
           raise("Incorrect parameter type #{@type.inspect}")
         end
@@ -222,7 +232,7 @@ module Multimethod
 
     # Returns a String representing this Parameter in a Signature string.
     def to_s
-      "#{@type} #{to_ruby_arg}"
+      "#{@type}#{@type ? ' ' : ''}#{to_ruby_arg}"
     end
     
 

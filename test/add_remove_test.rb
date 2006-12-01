@@ -48,12 +48,13 @@ end
 
       # Remove asdfwert(AddRemoveA x)
       assert_not_nil m = Table.instance.find_method("AddRemoveA#asdfwert(AddRemoveA x)")
-      assert 1, m.size 
+      assert_equal 1, m.size 
       m = m[0]
       assert_not_nil m
       assert_not_nil mm = m.multimethod
       assert_equal   'AddRemoveA#asdfwert(AddRemoveA x)', m.signature.to_s
       assert_equal   AddRemoveA, m.signature.mod
+      assert_equal   'AddRemoveA', m.signature.parameter[1].type
       assert_equal   AddRemoveA, m.signature.parameter[1].type_object
 
       AddRemoveA.remove_multimethod(m)
@@ -69,8 +70,9 @@ end
       m = m[0]
       assert_not_nil m
       assert_not_nil mm = m.multimethod
-      assert_equal   'AddRemoveA#asdfwert(Kernel x)', m.signature.to_s
+      assert_equal   'AddRemoveA#asdfwert(x)', m.signature.to_s
       assert_equal   AddRemoveA, m.signature.mod
+      assert_equal   nil, m.signature.parameter[1].type
       assert_equal   Kernel, m.signature.parameter[1].type_object
 
       AddRemoveA.remove_multimethod(m)
