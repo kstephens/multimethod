@@ -109,16 +109,24 @@ module Multimethod
 
       str.sub!(/\A\s+/, '')
 
-      if md = /\A(\w+(::\w+)*)#(\w+)/.match(str)
+      if @mod && md = /\Adef\s+(self\.)?([^\s\(]+)/.match(str)
+        str = md.post_match
+        @class_method = ! ! md[1]
+        @name = md[2]
+      elsif @mod && md = /\A(self\.)?([^\s\(]+)/.match(str)
+        str = md.post_match
+        @class_method = ! ! md[1]
+        @name = md[2]
+      elsif md = /\A(\w+(::\w+)*)#([^\s\(]+)/.match(str)
         str = md.post_match
         @mod = md[1] unless @mod
         @name = md[3]
-      elsif md = /\A(\w+(::\w+)*)\.(\w+)/.match(str)
+      elsif md = /\A(\w+(::\w+)*)\.([^\s\(]+)/.match(str)
         str = md.post_match
         @mod = md[1] unless @mod
         @class_method = true
         @name = md[3]
-      elsif md  = /\A((\w+(::\w+)*)\s+)?def\s+(self\.)?(\w+)/.match(str)
+      elsif md = /\A((\w+(::\w+)*)\s+)?def\s+(self\.)?([^\s\(]+)/.match(str)
         str = md.post_match
         @mod = md[2] unless @mod
         @class_method = ! ! md[4]

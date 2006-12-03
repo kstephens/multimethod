@@ -1,12 +1,17 @@
+2006-12-02  Kurt A. Stephens  <kurt@umleta.com>
+
+	* Fixed non-alpha method names.
+
 2006-12-01  Kurt A. Stephens  <kurt@umleta.com>
 
 	* Fixed ambigous method testing.
 	
 2006-11-29  Kurt A. Stephens  <kurt@umleta.com>
 
-	* Major cleanup and documentation
+	* Major cleanup and documentation.
 	* Fixed default parameter scoring.
 
 2006-11-18  Kurt A. Stephens  <kurt@umleta.com>
 
-	* Initial release
+	* Initial release.
+	

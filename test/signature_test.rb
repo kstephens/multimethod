@@ -123,6 +123,14 @@ module Multimethod
     end
 
 
+    def test_scan_string_mod
+      assert_not_nil m1 = Signature.new(:mod => Object, :string => 'm(A a, B b, c = nil, *d)')
+
+      assert_signature m1
+      assert ! m1.class_method
+    end
+
+
     def test_scan_string_class_method
       assert_not_nil m1 = Signature.new(:string => 'Object.m(A a, B b, c = nil, *d)')
 
@@ -149,6 +157,7 @@ module Multimethod
       assert_equal     'call_method(foo(bar, "45,67"), \',\')', m1.parameter[2].default
     end
 
+
     def test_scan_default_at_end
       assert_not_nil m1 = Signature.new(:string => 'Object.m(A a, B b = call_method(foo(bar, "45,67"), \',\'), c = nil)')
 
@@ -156,6 +165,37 @@ module Multimethod
       assert_equal     :c, m1.parameter[3].name
       assert           m1.parameter[3].default
       assert_equal     'nil', m1.parameter[3].default
+    end
+
+
+    def test_scan_special_chars
+      assert_not_nil  m1 = Signature.new(:string => 'A#+(A a)')
+      assert_equal    '+', m1.name
+      assert          ! m1.class_method
+      assert_equal    2, m1.parameter.size
+      assert_equal    ::A, m1.parameter[0].type_object
+      assert_equal    ::A, m1.parameter[1].type_object
+
+
+      assert_not_nil  m1 = Signature.new(:string => 'A#foo=(A a)')
+      assert_equal    'foo=', m1.name
+      assert          ! m1.class_method
+      assert_equal    2, m1.parameter.size
+      assert_equal    ::A, m1.parameter[0].type_object
+      assert_equal    ::A, m1.parameter[1].type_object
+
+      assert_not_nil  m1 = Signature.new(:string => 'String#sub!(Regexp a)')
+      assert_equal    'sub!', m1.name
+      assert          ! m1.class_method
+      assert_equal    2, m1.parameter.size
+      assert_equal    ::String, m1.parameter[0].type_object
+      assert_equal    ::Regexp, m1.parameter[1].type_object
+
+      assert_not_nil  m1 = Signature.new(:string => 'String#empty?')
+      assert_equal    'empty?', m1.name
+      assert          ! m1.class_method
+      assert_equal    1, m1.parameter.size
+      assert_equal    ::String, m1.parameter[0].type_object
     end
 
 

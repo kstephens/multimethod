@@ -1,5 +1,9 @@
 = Multimethod Release History
 
+== Release 0.2.2: 2006/12/02
+
+* Fixed non-alpha method names,
+
 == Release 0.2.1: 2006/12/01
 
 * Fixed ambiguous method testing.
