@@ -8,9 +8,9 @@ gem install multimethod
 
 == Documentation
 
-"Project Info":http://rubyforge.org/projects/multimethod/
+{Project Info}:http://rubyforge.org/projects/multimethod/
 
-"API Documentation":http://multimethod.rubyforge.org/
+{API Documentation}:http://multimethod.rubyforge.org/
 
 The RubyForge package multimethod
 implements multi-method dispatching on argument types.
