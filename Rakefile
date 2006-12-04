@@ -1,6 +1,16 @@
 # Rakefile for ruby-multimethods      -*- ruby -*-
 # Adapted from RubyGems/Rakefile
-# upload_package NOT WORKING YET
+
+# For release
+"
+svn status
+rake update_version
+rake package
+rake release VERSION=x.x.x
+rake svn_release
+rake publish_docs
+rake announce
+"
 
 #################################################################
 
